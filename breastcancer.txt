@@ -1,0 +1,66 @@
+import streamlit as st
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+
+# Load dataset from CSV
+@st.cache_data
+def load_data():
+    df = pd.read_csv("your_dataset.csv")  # <-- replace with your file name
+    return df
+
+df = load_data()
+
+# Display dataset
+st.subheader("Dataset Preview")
+st.write(df.head())
+
+# Features and target
+X = df[['Tumor Size', 'Regional Node Examined']]
+y = df['Status']
+
+# Train model
+model = LinearRegression()
+model.fit(X, y)
+
+# User input function
+def user_input_features():
+    tumor_size = st.sidebar.slider(
+        'Tumor Size',
+        float(X['Tumor Size'].min()),
+        float(X['Tumor Size'].max()),
+        float(X['Tumor Size'].mean())
+    )
+
+    node_examined = st.sidebar.slider(
+        'Regional Node Examined',
+        float(X['Regional Node Examined'].min()),
+        float(X['Regional Node Examined'].max()),
+        float(X['Regional Node Examined'].mean())
+    )
+
+    data = {
+        'Tumor Size': tumor_size,
+        'Regional Node Examined': node_examined
+    }
+
+    features = pd.DataFrame(data, index=[0])
+    return features
+
+# Get input
+input_df = user_input_features()
+
+# Show input
+st.subheader("User Input")
+st.write(input_df)
+
+# Prediction
+prediction = model.predict(input_df)
+
+# Output
+st.subheader("Predicted Status")
+st.write(prediction[0])
+
+# Model details
+st.subheader("Model Details")
+st.write(f"Intercept: {model.intercept_:.2f}")
+st.write(f"Coefficients: {model.coef_}")
